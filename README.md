@@ -1,6 +1,5 @@
-To start th application:
+In "/src/main/resources" create "application.properties" file and add:
 
-1. In "/src/main/resources" create "application.properties" file and add:
 ```
     spring.application.name=flashcards
 
@@ -16,3 +15,5 @@ To start th application:
     spring.flyway.locations=classpath:db/migration
 
 ```
+
+---
