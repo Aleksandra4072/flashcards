@@ -11,8 +11,8 @@ import java.util.UUID;
 
 @Mapper
 public interface BundleMapper {
-    @Select("SELECT * FROM bundles")
-    List<Bundle> findALl();
+    @Select("SELECT title, subject FROM bundles WHERE user_id = #{userId}")
+    List<Bundle> findALlByUserID(@Param("userId") UUID userId);
 
     @Select("SELECT * FROM bundles WHERE user_id = #{userId}")
     List<Bundle> findByUserId(@Param("userId") UUID userId);
