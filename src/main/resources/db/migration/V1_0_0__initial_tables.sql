@@ -17,6 +17,5 @@ CREATE TABLE IF NOT EXISTS cards(
     term            VARCHAR(255) NOT NULL,
     definition      TEXT NOT NULL,
     img             VARCHAR(255),
-    user_id         UUID REFERENCES users(id) NOT NULL,
     bundle_id       UUID REFERENCES bundles(id) NOT NULL
 );
