@@ -55,4 +55,12 @@ public class UserService {
 
         userMapper.delete(id);
     }
+
+    public void createUser(User user) {
+        userMapper.addUser(user);
+    }
+
+    public void updateUser(UUID id, User user) {
+        userMapper.updateUser(id, user);
+    }
 }
