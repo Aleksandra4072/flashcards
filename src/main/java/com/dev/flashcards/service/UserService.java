@@ -1,6 +1,6 @@
 package com.dev.flashcards.service;
 
-import com.dev.flashcards.exception.UserNotFoundException;
+import com.dev.flashcards.exception.NotFoundException;
 import com.dev.flashcards.mapper.BundleMapper;
 import com.dev.flashcards.mapper.CardMapper;
 import com.dev.flashcards.mapper.UserMapper;
@@ -35,7 +35,7 @@ public class UserService {
     public User getById(UUID id) {
         User user = userMapper.findById(id);
         if (user == null) {
-            throw new UserNotFoundException("User with ID " + id + " not found");
+            throw new NotFoundException("User with ID " + id + " not found");
         }
         return user;
     }
@@ -43,10 +43,10 @@ public class UserService {
     public void delete(UUID id) {
         User user  = userMapper.findById(id);
         if (user == null ) {
-            throw new UserNotFoundException("User with ID " + id + " not found");
+            throw new NotFoundException("User with ID " + id + " not found");
         }
 
-        List<Bundle> bundles = bundleMapper.findByUserId(id);
+        List<Bundle> bundles = bundleMapper.findALlByUserID(id);
         for (Bundle bundle : bundles) {
             cardMapper.deleteByBundleId(UUID.fromString(bundle.getId()));
         }

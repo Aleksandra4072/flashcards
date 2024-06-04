@@ -11,11 +11,11 @@ import java.util.UUID;
 
 @Mapper
 public interface BundleMapper {
-    @Select("SELECT title, subject FROM bundles WHERE user_id = #{userId}")
+    @Select("SELECT * FROM bundles WHERE user_id = #{userId}")
     List<Bundle> findALlByUserID(@Param("userId") UUID userId);
 
-    @Select("SELECT * FROM bundles WHERE user_id = #{userId}")
-    List<Bundle> findByUserId(@Param("userId") UUID userId);
+    @Select("SELECT * FROM bundles WHERE id = #{id}")
+    Bundle findById(@Param("id") UUID id);
 
     @Select("DELETE FROM bundles WHERE user_id = #{userId}")
     void deleteByUserId(@Param("userId") UUID userId);
