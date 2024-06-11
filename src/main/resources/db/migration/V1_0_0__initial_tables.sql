@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS users(
     id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    username        VARCHAR(255),
-    email           VARCHAR(255) UNIQUE
+    email           VARCHAR(255) UNIQUE,
+    password        VARCHAR(255),
+    created_at      DATE DEFAULT CURRENT_DATE NOT NULL,
+    updated_at      DATE NULL
 );
 
 CREATE TABLE IF NOT EXISTS bundles(

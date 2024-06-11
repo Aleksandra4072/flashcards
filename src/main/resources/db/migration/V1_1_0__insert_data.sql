@@ -3,8 +3,8 @@ WITH existing_user AS (
     FROM users
     WHERE email = 'john.doe@example.com'
 ), inserted_user AS (
-    INSERT INTO users (username, email)
-        SELECT 'john_doe', 'john.doe@example.com'
+    INSERT INTO users (email, password)
+        SELECT 'john.doe@example.com', '$2a$12$6NXLs611NkZ7HMJQKLUbOeTI70ecRttyiykp/KXocyHZz3eXfQIZK'
         WHERE NOT EXISTS (SELECT 1 FROM existing_user)
         RETURNING id
 ), final_user AS (
@@ -23,3 +23,5 @@ WITH existing_user AS (
 INSERT INTO cards (term, definition, img, bundle_id)
 SELECT 'Term 1', 'Definition of Term 1', 'image_url', id
 FROM inserted_bundle;
+
+-- yCAv3wLqePVt24DQJzhgHj

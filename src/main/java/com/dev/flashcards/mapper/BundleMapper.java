@@ -2,9 +2,11 @@ package com.dev.flashcards.mapper;
 
 import com.dev.flashcards.model.Bundle;
 import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,4 +24,14 @@ public interface BundleMapper {
 
     @Delete("DELETE FROM bundles WHERE id = #{id}")
     void deleteById(@Param("id") UUID id);
+
+    @Insert("INSERT INTO bundles " +
+            "(title, description, subject, user_id) " +
+            "VALUES (#{title}, #{description}, #{subject}, #{user_id})")
+    void addBundle(Bundle bundle);
+
+    @Update("UPDATE users " +
+            "SET title=#{title}, description=#{description}, subject=#{subject}" +
+            " WHERE id=#{id}")
+    void updateBundle(@Param("id") UUID id, Bundle bundle);
 }
