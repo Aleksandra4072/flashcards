@@ -21,3 +21,14 @@ CREATE TABLE IF NOT EXISTS cards(
     img             VARCHAR(255),
     bundle_id       UUID REFERENCES bundles(id) NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS roles(
+    id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    name            VARCHAR(255) NOT NULL,
+    description     VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS user_roles(
+    user_id        UUID REFERENCES users(id) NOT NULL,
+    role_id        UUID REFERENCES roles(id) NOT NULL
+);

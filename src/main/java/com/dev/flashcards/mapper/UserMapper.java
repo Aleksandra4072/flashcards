@@ -1,5 +1,6 @@
 package com.dev.flashcards.mapper;
 
+import com.dev.flashcards.dto.UserDto;
 import com.dev.flashcards.model.User;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -18,8 +19,8 @@ public interface UserMapper {
     @Select("SELECT * FROM users WHERE email = #{email}")
     Optional<User> findByEmail(@Param("email") String email);
 
-    @Select("SELECT * FROM users")
-    List<User> findALl();
+    @Select("SELECT id, email FROM users")
+    List<UserDto> findALl();
 
     @Select("SELECT * FROM users WHERE id = #{id}")
     User findById(@Param("id") UUID id);

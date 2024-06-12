@@ -1,11 +1,13 @@
 package com.dev.flashcards.service;
 
+import com.dev.flashcards.dto.UserDto;
 import com.dev.flashcards.exception.NotFoundException;
 import com.dev.flashcards.mapper.BundleMapper;
 import com.dev.flashcards.mapper.CardMapper;
 import com.dev.flashcards.mapper.UserMapper;
 import com.dev.flashcards.model.Bundle;
 import com.dev.flashcards.model.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -27,9 +30,11 @@ public class UserService {
         this.cardMapper = cardMapper;
     }
 
-    public List<User> getAll() {
-        List<User> users = userMapper.findALl();
-        return users == null ?  new ArrayList<>() : users;
+    public List<UserDto> getAll() {
+        List<UserDto> users = userMapper.findALl();
+        log.info("Fetching all users.");
+        users.forEach(user -> log.info(user.getEmail()));
+        return users.isEmpty() ?  new ArrayList<>() : users;
     }
 
     public User getById(UUID id) {
