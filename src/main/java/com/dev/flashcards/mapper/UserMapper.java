@@ -1,6 +1,7 @@
 package com.dev.flashcards.mapper;
 
 import com.dev.flashcards.dto.UserDto;
+import com.dev.flashcards.model.Role;
 import com.dev.flashcards.model.User;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -10,14 +11,17 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Mapper
 public interface UserMapper {
 
     @Select("SELECT * FROM users WHERE email = #{email}")
-    Optional<User> findByEmail(@Param("email") String email);
+    User findByEmail(@Param("email") String email);
+
+    @Select("SELECT r.* FROM roles r INNER JOIN user_roles ur ON r.id = ur.role_id WHERE ur.user_id = #{userId}")
+    Set<Role> findRolesByUserId(@Param("userId") UUID userId);
 
     @Select("SELECT id, email FROM users")
     List<UserDto> findALl();

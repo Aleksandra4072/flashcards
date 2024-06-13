@@ -1,6 +1,6 @@
-INSERT INTO users (email, password) VALUES
-    ('user@mail.com', '$2a$12$zbsZnJO.L4BTTG2J9RlN7uhIZ6wKRJJ8IgB2pEuqiR5t0/SOkHcj.'),
-    ('admin@mail.com', '$2a$12$6NXLs611NkZ7HMJQKLUbOeTI70ecRttyiykp/KXocyHZz3eXfQIZK');
+INSERT INTO users (email, password, created_at) VALUES
+    ('user@mail.com', '$2y$10$br4FGaTysyQI7ZyHc6MDuuWPg2ZC/LsT89yYi.Dzjl2GYZT48UWKO', NOW()),
+    ('admin@mail.com', '$2y$10$uRUfUquE8bRNcaGWo4DwqOTTfbqEGybGoF8WcOtVhaPfNESzXCdyG', NOW());
 
 -- create roles
 INSERT INTO roles (name, description) VALUES

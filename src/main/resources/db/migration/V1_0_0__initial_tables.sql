@@ -30,5 +30,6 @@ CREATE TABLE IF NOT EXISTS roles(
 
 CREATE TABLE IF NOT EXISTS user_roles(
     user_id        UUID REFERENCES users(id) NOT NULL,
-    role_id        UUID REFERENCES roles(id) NOT NULL
+    role_id        UUID REFERENCES roles(id) NOT NULL,
+    PRIMARY KEY (user_id, role_id)
 );

@@ -1,12 +1,15 @@
 package com.dev.flashcards.service;
 
+import com.dev.flashcards.mapper.UserMapper;
 import com.dev.flashcards.model.User;
+import com.dev.flashcards.util.UuidParser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -26,10 +29,19 @@ public class JwtService {
     @Value("${jwt.expiration-time}")
     private long EXPIRATION_TIME;
 
+    private final UserMapper userMapper;
+
+    private JwtService (UserMapper userMapper) {
+       this.userMapper = userMapper;
+    }
+
     public String generateAccessToken(User user) {
+        String roles = userMapper.findRolesByUserId(UuidParser.parse(user.getId())).toString();
+
         return Jwts.builder()
-                .setSubject(String.format("%s,%s", user.getId(), user.getEmail()))
-                .setIssuer("CodeJava")
+                .claim("id", user.getId())
+                .claim("email", user.getEmail())
+                .claim("roles", roles)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
@@ -39,7 +51,10 @@ public class JwtService {
 
     public boolean validateAccessToken(String token) {
         try {
-            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(getSignInKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException ex) {
             log.error("JWT expired: " + ex.getMessage());
@@ -54,11 +69,7 @@ public class JwtService {
         return false;
     }
 
-    public String getSubject(String token) {
-        return parseClaims(token).getSubject();
-    }
-
-    private Claims parseClaims(String token) {
+    public Claims parseClaims(String token) {
         return Jwts
                 .parserBuilder()
                 .setSigningKey(getSignInKey())

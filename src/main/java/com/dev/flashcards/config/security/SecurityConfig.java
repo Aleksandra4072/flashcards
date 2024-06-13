@@ -3,6 +3,7 @@ package com.dev.flashcards.config.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,7 +18,8 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+@EnableMethodSecurity(prePostEnabled = false, jsr250Enabled = true)
+public class SecurityConfig  {
     private final AuthenticationProvider authProvider;
     private final JwtAuthenticationFilter jwtAuthFilter;
 
@@ -30,7 +32,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityfilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -39,6 +41,7 @@ public class SecurityConfig {
                         //public endpoints
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/v3/api-docs/**","/swagger-ui/**").permitAll()
+                        .requestMatchers("/users/**").hasAuthority("ROLE_ADMIN")
                         //private endpoints
                         .anyRequest().authenticated())
                 .authenticationProvider(authProvider)
@@ -52,7 +55,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:8080"));
+        configuration.setAllowedOrigins(List.of("http://localhost:8000"));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PUT"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
 

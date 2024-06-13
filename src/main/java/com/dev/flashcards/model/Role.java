@@ -30,4 +30,13 @@ public class Role {
     @Column(name = "description")
     @Schema(description = "Role descriptions", example = "Some role descriptions")
     private String description;
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
+
+    public Role(String name) {
+        this.name = name;
+    }
 }

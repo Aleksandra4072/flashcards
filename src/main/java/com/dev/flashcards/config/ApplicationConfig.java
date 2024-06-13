@@ -1,6 +1,8 @@
 package com.dev.flashcards.config;
 
 import com.dev.flashcards.mapper.UserMapper;
+import com.dev.flashcards.model.User;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+@Slf4j
 @Configuration
 public class ApplicationConfig {
 
@@ -21,9 +24,16 @@ public class ApplicationConfig {
     }
 
     @Bean
-    UserDetailsService userDetailsService() {
-        return email -> userMapper.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDetailsService userDetailsService() {
+        return username -> {
+            User user = userMapper.findByEmail(username);
+            if (user.getEmail().isEmpty()) {
+                log.error("User not found");
+                throw new UsernameNotFoundException("User not found");
+            } else {
+                return user;
+            }
+        };
     }
 
     @Bean
