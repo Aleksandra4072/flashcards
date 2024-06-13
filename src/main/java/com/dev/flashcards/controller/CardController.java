@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
-@SecurityRequirement(name = "Authentication")
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Cards")
 @RestController
 @RequestMapping("/cards")
@@ -33,7 +33,6 @@ public class CardController {
         return cardService.getAllByBundleId(uuid);
     }
 
-    @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete card", description = "Delete card")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable String id) {

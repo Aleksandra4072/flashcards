@@ -13,13 +13,10 @@ import org.springframework.context.annotation.Configuration;
                 title = "CAPI Documentation",
                 version = "1.0",
                 description = "This is a Flashcards API documentation"
-        ),
-        security = {
-                @SecurityRequirement(name = "bearerAuth")
-        }
-)
+        ))
+@SecurityRequirement(name = "bearerAuth")
 @SecurityScheme(
-        name = "Authentication",
+        name = "bearerAuth",
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "JWT"

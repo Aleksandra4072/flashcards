@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Bundles")
 @RestController
 @RequestMapping("/bundles")
@@ -25,7 +26,6 @@ public class BundleController {
         this.bundleService = bundleService;
     }
 
-    @SecurityRequirement(name = "Authentication")
     @Operation(summary = "Get all the bundles of a user", description = "Returns a list of bundles")
     @GetMapping("/{userId}")
     public List<Bundle> getAllByUserId(@PathVariable String userId) {
@@ -33,7 +33,6 @@ public class BundleController {
         return bundleService.getAllByUserId(uuid);
     }
 
-    @SecurityRequirement(name = "Authentication")
     @Operation(summary = "Get the bundles by id", description = "Returns a certain bundles")
     @GetMapping("")
     public Bundle getAllById(@RequestParam(name = "id") String id) {
@@ -41,7 +40,6 @@ public class BundleController {
         return bundleService.getById(uuid);
     }
 
-    @SecurityRequirement(name = "Authentication")
     @Operation(summary = "Deleting bundle with it's cards", description = "Deleting bundle")
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable String id) {
