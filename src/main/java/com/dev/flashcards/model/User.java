@@ -2,62 +2,37 @@ package com.dev.flashcards.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "users")
 public class User implements UserDetails {
-    @Id
-    @Column(name = "id", nullable = false, unique = true)
+
     @Schema(description = "User ID", example = "123e4567-e89b-12d3-a456-556642440000")
     private String id;
 
-    @Column(name = "email", nullable = false, unique = true)
     @Schema(description = "Email address of the user", example = "john@example.com")
     private String email;
 
-    @Column(nullable = false, name = "password")
     @Schema(description = "Password of a user", example = "!StrongPassword123!")
     private String password;
 
-    @Column(updatable = false, name = "created_at", nullable = false)
     @Schema(description = "Date fo creation", example = "2024-06-11")
     private Date createdAt;
 
-    @Column(name = "updated_at")
     @Schema(description = "Date of update", example = "2024-06-11")
     private Date updatedAt;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
     private Set<Role> roles = new HashSet<>();
 
     public void addRole(Role role) {
