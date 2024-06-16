@@ -5,13 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Role {
 
     @Schema(description = "Role ID", example = "123e4567-e89b-12d3-a456-556642440000")
-    private String id;
+    private UUID id;
 
     @Schema(description = "Role name", example = "ADMIN")
     private String name;

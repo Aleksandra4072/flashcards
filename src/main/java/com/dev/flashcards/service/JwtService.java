@@ -2,14 +2,12 @@ package com.dev.flashcards.service;
 
 import com.dev.flashcards.mapper.UserMapper;
 import com.dev.flashcards.model.User;
-import com.dev.flashcards.util.UuidParser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -36,7 +34,7 @@ public class JwtService {
     }
 
     public String generateAccessToken(User user) {
-        String roles = userMapper.findRolesByUserId(UuidParser.parse(user.getId())).toString();
+        String roles = userMapper.findRolesByUserId(user.getId()).toString();
 
         return Jwts.builder()
                 .claim("id", user.getId())

@@ -1,4 +1,4 @@
-package com.dev.flashcards.dto;
+package com.dev.flashcards.dto.requests;
 
 import lombok.Getter;
 import lombok.Setter;

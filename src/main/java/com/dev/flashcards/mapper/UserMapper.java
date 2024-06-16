@@ -1,6 +1,6 @@
 package com.dev.flashcards.mapper;
 
-import com.dev.flashcards.dto.UserDto;
+import com.dev.flashcards.dto.requests.UserDto;
 import com.dev.flashcards.model.Role;
 import com.dev.flashcards.model.User;
 import org.apache.ibatis.annotations.Delete;

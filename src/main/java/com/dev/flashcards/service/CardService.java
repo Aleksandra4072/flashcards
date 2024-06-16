@@ -19,17 +19,17 @@ public class CardService {
         this.cardMapper = cardMapper;
     }
 
-    public List<Card> getAllByBundleId(UUID bundleId) {
-        List<Card> cards = cardMapper.findALlByBundleId(bundleId);
+    public List<Card> getAllByBundleId(String bundleId) {
+        List<Card> cards = cardMapper.findALlByBundleId(UUID.fromString(bundleId));
         return cards == null ?  new ArrayList<>() : cards;
     }
 
-    public void delete(UUID id) {
-        Card card = cardMapper.findById(id);
+    public void delete(String id) {
+        Card card = cardMapper.findById(UUID.fromString(id));
         if (card == null) {
             throw new NotFoundException("Card was not found");
         }
 
-        cardMapper.delete(id);
+        cardMapper.delete(UUID.fromString(id));
     }
 }

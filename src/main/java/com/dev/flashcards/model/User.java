@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Data
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 public class User implements UserDetails {
 
     @Schema(description = "User ID", example = "123e4567-e89b-12d3-a456-556642440000")
-    private String id;
+    private UUID id;
 
     @Schema(description = "Email address of the user", example = "john@example.com")
     private String email;

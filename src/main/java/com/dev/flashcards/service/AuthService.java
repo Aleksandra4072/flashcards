@@ -1,8 +1,7 @@
 package com.dev.flashcards.service;
 
-import com.dev.flashcards.util.UuidParser;
-import com.dev.flashcards.dto.LoginUserDto;
-import com.dev.flashcards.dto.RegisterUserDto;
+import com.dev.flashcards.dto.requests.LoginUserDto;
+import com.dev.flashcards.dto.requests.RegisterUserDto;
 import com.dev.flashcards.mapper.RoleMapper;
 import com.dev.flashcards.mapper.UserMapper;
 import com.dev.flashcards.model.Role;
@@ -16,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -55,10 +55,10 @@ public class AuthService {
         log.info("Created user: {}", createdUser.getId());
         if(input.getRoleId() == null) {
             Role role = roleMapper.findByName("ROLE_USER");
-            roleMapper.addRoleToUser(UuidParser.parse(createdUser.getId()), UuidParser.parse(role.getId()));
+            roleMapper.addRoleToUser(createdUser.getId(), role.getId());
         } else {
-            Role role = roleMapper.findById(UuidParser.parse(input.getRoleId()));
-            roleMapper.addRoleToUser(UuidParser.parse(createdUser.getId()), UuidParser.parse(role.getId()));
+            Role role = roleMapper.findById(UUID.fromString(input.getRoleId()));
+            roleMapper.addRoleToUser(createdUser.getId(), role.getId());
         }
     }
 

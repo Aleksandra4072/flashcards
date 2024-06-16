@@ -1,6 +1,6 @@
 package com.dev.flashcards.controller;
 
-import com.dev.flashcards.dto.UserDto;
+import com.dev.flashcards.dto.requests.UserDto;
 import com.dev.flashcards.model.User;
 import com.dev.flashcards.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,15 +39,13 @@ public class UserController {
     @Operation(summary = "Get user by ID", description = "Returns a user")
     @GetMapping("/{id}")
     public User getUserById(@PathVariable String id) {
-        UUID uuid = UUID.fromString(id);
-        return userService.getById(uuid);
+        return userService.getById(UUID.fromString(id));
     }
 
     @Operation(summary = "Delete user by ID", description = "Returns void")
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable String id) {
-        UUID uuid = UUID.fromString(id);
-        userService.delete(uuid);
+        userService.delete(id);
     }
 
     @Operation(summary = "Create user", description = "Create user")
@@ -59,7 +57,6 @@ public class UserController {
     @Operation(summary = "Update user", description = "Update user")
     @PutMapping("/{id}")
     public void updateUser(@PathVariable String id, @RequestBody User user) {
-        UUID uuid = UUID.fromString(id);
-        userService.updateUser(uuid, user);
+        userService.updateUser(id, user);
     }
 }

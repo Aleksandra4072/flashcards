@@ -1,6 +1,6 @@
 package com.dev.flashcards.service;
 
-import com.dev.flashcards.dto.UserDto;
+import com.dev.flashcards.dto.requests.UserDto;
 import com.dev.flashcards.exception.NotFoundException;
 import com.dev.flashcards.mapper.BundleMapper;
 import com.dev.flashcards.mapper.CardMapper;
@@ -8,7 +8,6 @@ import com.dev.flashcards.mapper.UserMapper;
 import com.dev.flashcards.model.Bundle;
 import com.dev.flashcards.model.User;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,7 +18,6 @@ import java.util.UUID;
 @Service
 public class UserService {
 
-    @Autowired
     private final UserMapper userMapper;
     private final BundleMapper bundleMapper;
     private final CardMapper cardMapper;
@@ -45,28 +43,29 @@ public class UserService {
         return user;
     }
 
-    public void delete(UUID id) {
-        User user  = userMapper.findById(id);
+    public void delete(String id) {
+        UUID uuid = UUID.fromString(id);
+        User user  = userMapper.findById(uuid);
         if (user == null ) {
             throw new NotFoundException("User with ID " + id + " not found");
         }
 
-        List<Bundle> bundles = bundleMapper.findALlByUserID(id);
+        List<Bundle> bundles = bundleMapper.findALlByUserID(uuid);
         for (Bundle bundle : bundles) {
-            cardMapper.deleteByBundleId(UUID.fromString(bundle.getId()));
+            cardMapper.deleteByBundleId(bundle.getId());
         }
 
-        bundleMapper.deleteByUserId(id);
+        bundleMapper.deleteByUserId(uuid);
 
-        userMapper.delete(id);
+        userMapper.delete(uuid);
     }
 
     public void createUser(User user) {
         userMapper.addUser(user);
     }
 
-    public void updateUser(UUID id, User user) {
-        userMapper.updateUser(id, user);
+    public void updateUser(String id, User user) {
+        userMapper.updateUser(UUID.fromString(id), user);
     }
 
 

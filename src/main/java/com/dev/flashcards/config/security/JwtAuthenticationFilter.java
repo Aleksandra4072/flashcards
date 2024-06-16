@@ -19,6 +19,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -87,7 +88,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             userDetails.addRole(new Role(aRoleName.trim()));
         }
 
-        userDetails.setId((String)claims.get("id"));
+        userDetails.setId(UUID.fromString((String)claims.get("id")));
         userDetails.setEmail((String)claims.get("email"));
 
         log.info("Authorities are as follows: {}", userDetails.getAuthorities());

@@ -5,13 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Bundle {
 
     @Schema(description = "Bundle ID", example = "123e4567-e89b-12d3-a456-556642440000")
-    private String id;
+    private UUID id;
 
     @Schema(description = "Bundle tittle", example = "Some bundle title")
     private String title;
@@ -23,5 +25,5 @@ public class Bundle {
     private String subject;
 
     @Schema(description = "Bundle Author ID", example = "123e4567-e89b-12d3-a456-556642440000")
-    private String user_id;
+    private UUID user_id;
 }
