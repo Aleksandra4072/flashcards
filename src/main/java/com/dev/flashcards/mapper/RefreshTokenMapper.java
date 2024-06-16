@@ -15,6 +15,8 @@ public interface RefreshTokenMapper {
     @Select("SELECT * FROM refresh_tokens WHERE token = #{token}")
     Optional<RefreshToken> findByToken(@Param("token") String token);
 
+    @Select("SELECT * FROM refresh_tokens WHERE user_id = #{userId}")
+    RefreshToken findByUserId(@Param("userId") UUID userId);
 
     @Insert("INSERT INTO refresh_tokens(token, expiry_date, user_id) VALUES (#{token}, #{expiry_date}, #{user_id})")
     void add(RefreshToken refreshToken);

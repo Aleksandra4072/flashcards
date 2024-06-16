@@ -4,6 +4,8 @@ import com.dev.flashcards.config.security.JwtAuthenticationFilter;
 import com.dev.flashcards.dto.requests.LoginUserDto;
 import com.dev.flashcards.dto.requests.RefreshTokenDto;
 import com.dev.flashcards.dto.requests.RegisterUserDto;
+import com.dev.flashcards.dto.responses.LogoutResponse;
+import com.dev.flashcards.exception.NotFoundException;
 import com.dev.flashcards.model.RefreshToken;
 import com.dev.flashcards.model.User;
 import com.dev.flashcards.dto.responses.LoginResponse;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @SecurityRequirements()
 @RequestMapping("/auth")
@@ -55,6 +59,8 @@ public class AuthController {
         User authenticatedUser = authService.authenticate(loginUserDto);
 
         if(authenticatedUser.isAccountNonLocked() && authenticatedUser.isAccountNonExpired()) {
+            refreshTokenService.deleteIfExist(authenticatedUser.getId());
+
             RefreshToken refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getEmail());
 
             String accessToken = jwtService.generateAccessToken(authenticatedUser);
@@ -90,5 +96,18 @@ public class AuthController {
                     return loginResponse;
                 })
                 .orElseThrow(() -> new RuntimeException("Refresh Token is not valid or expired..!!"));
+    }
+
+    @PostMapping("logout")
+    public ResponseEntity<LogoutResponse> logout(@RequestBody RefreshTokenDto refreshTokenDto) {
+        Optional<RefreshToken> refreshToken = refreshTokenService.findByToken(refreshTokenDto.getRefreshToken());
+        if (refreshToken.isEmpty()) {
+            throw new NotFoundException("Some error occurred");
+        } else {
+            refreshTokenService.delete(refreshTokenDto.getRefreshToken());
+            LogoutResponse logoutResponse = new LogoutResponse();
+            logoutResponse.setLogoutMessage("Logged out");
+            return ResponseEntity.ok(logoutResponse);
+        }
     }
 }

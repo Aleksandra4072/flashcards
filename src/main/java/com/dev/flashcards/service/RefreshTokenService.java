@@ -4,6 +4,7 @@ import com.dev.flashcards.mapper.RefreshTokenMapper;
 import com.dev.flashcards.mapper.UserMapper;
 import com.dev.flashcards.model.RefreshToken;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -14,6 +15,9 @@ import java.util.UUID;
 @Slf4j
 @Service
 public class RefreshTokenService {
+    @Value("${refresh.token.expiration-time}")
+    private long EXPIRATION_TIME;
+
     private final RefreshTokenMapper refreshTokenMapper;
     private final UserMapper userMapper;
 
@@ -29,7 +33,7 @@ public class RefreshTokenService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .user_id(userMapper.findByEmail(username).getId())
                 .token(UUID.randomUUID().toString())
-                .expiry_date(Instant.now().plus(7, ChronoUnit.DAYS)) // set expiry of refresh token to 10 minutes - you can configure it application.properties file
+                .expiry_date(Instant.now().plus(EXPIRATION_TIME, ChronoUnit.DAYS))
                 .build();
         refreshTokenMapper.add(refreshToken);
         return refreshToken;
@@ -48,5 +52,22 @@ public class RefreshTokenService {
         }
 
         return token;
+    }
+
+    public void deleteIfExist(UUID userId){
+        RefreshToken refreshToken = refreshTokenMapper.findByUserId(userId);
+        if(refreshToken != null) {
+            refreshTokenMapper.delete(refreshToken.getId());
+        }
+    }
+
+    public void delete(String token) {
+        Optional<RefreshToken> refreshToken = refreshTokenMapper.findByToken(token);
+        if (refreshToken.isPresent()) {
+            UUID id = refreshToken.get().getId();
+            refreshTokenMapper.delete(id);
+        } else {
+            throw new RuntimeException("Refresh Token is not valid or expired..!!");
+        }
     }
 }
