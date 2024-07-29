@@ -1,0 +1,15 @@
+.env.*
+
+.venv/
+
+__pycache__/
+*.py[cod]
+
+# Logs and databases
+*.log
+
+
+.idea/
+.vscode/
+
+poetry.lock
