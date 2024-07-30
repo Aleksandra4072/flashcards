@@ -6,5 +6,5 @@ from pydantic import (
 
 class GeneralResponse(BaseModel):
     message: str = Field(
-        default="Signup successful"
+        default="Message response from backend"
     )

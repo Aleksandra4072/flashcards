@@ -26,7 +26,7 @@ class _CrudUser:
         db: AsyncSession,
         user: auth.SignupRequest
     ) -> User:
-        logger.info('Creating user...')
+        logger.info('Creating new user')
         hashed_password = security.hash_password(user.password)
 
         new_user = User(

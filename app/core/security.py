@@ -6,7 +6,7 @@ from functools import wraps
 from typing import List
 
 from app.core.env_settings import settings
-from app.core.error_handler import CustomError
+from app.core.error_handler import Error401, Error403
 from app.models.models import User
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -50,11 +50,11 @@ class _Security:
             async def wrapper(*args, **kwargs):
                 current_user: User = kwargs.get("current_user")
                 if not current_user:
-                    raise CustomError(status_code=401, message="Not authenticated")
+                    raise Error401
 
                 user_roles = [role.name for role in current_user.roles]
                 if not any(role in user_roles for role in roles):
-                    raise CustomError(status_code=403, message="User is not authorized to access")
+                    raise Error403
 
                 return await func(*args, **kwargs)
 

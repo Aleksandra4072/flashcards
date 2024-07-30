@@ -8,7 +8,7 @@ from functools import wraps
 
 from app.schemas import auth, common
 from app.crud.user import crud_user
-from app.core.error_handler import CustomError
+from app.core.error_handler import Error400, Error401, Error403
 from app.core.security import security
 from app.core.env_settings import settings
 from app.core.db_config import get_db
@@ -23,16 +23,10 @@ class _AuthService:
         db: AsyncSession
     ) -> common.GeneralResponse:
         if await crud_user.get_by_email(db=db, email=user_details.email):
-            raise CustomError(
-                status_code=400,
-                message="Email already registered"
-            )
+            raise Error400(details="Email already registered")
 
         if not await crud_user.sign_up(db=db, user=user_details):
-            raise CustomError(
-                status_code=400,
-                message="Something went wrong"
-            )
+            raise Error400(details="Something went wrong")
 
         return common.GeneralResponse(
             message="Signup successful"
@@ -50,10 +44,7 @@ class _AuthService:
                 plain_password=credentials.password,
                 hashed_password=user.password
         ):
-            raise CustomError(
-                status_code=400,
-                message="Wrong credentials"
-            )
+            raise Error401(details="Wrong credentials")
 
         roles = [role.name for role in user.roles]
         access_token = security.create_access_token(
@@ -78,17 +69,17 @@ class _AuthService:
     ) -> auth.LoginResponse:
         refresh_token = request.cookies.get('refresh_token')
         if not refresh_token:
-            raise CustomError(status_code=401, message="Refresh token not found")
+            raise Error401(details="Refresh token not found")
 
         try:
             payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             email: str = payload.get("email")
             if email is None:
-                raise CustomError(status_code=401, message="Payload is empty")
+                raise Error401(details="Payload is empty")
         except jwt.ExpiredSignatureError:
-            raise CustomError(status_code=401, message="Expired token")
+            raise Error401(details="Expired token")
         except jwt.InvalidTokenError:
-            raise CustomError(status_code=401, message="Invalid token")
+            raise Error401(details="Invalid token")
 
         user = await crud_user.get_by_email(db=db, email=email)
         roles = [role.name for role in user.roles]
@@ -111,23 +102,20 @@ class _AuthService:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             return {"token_payload": payload}
         except jwt.ExpiredSignatureError:
-            raise CustomError(status_code=400, message="Token is expired")
+            raise Error401(details="Token is expired")
         except jwt.PyJWTError:
-            raise CustomError(status_code=400, message="Token is invalid")
+            raise Error401(details="Token is invalid")
 
     @staticmethod
     async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
-        credentials_exception = CustomError(
-            status_code=401,
-            message="Could not validate credentials"
-        )
+        credentials_exception = Error401(details="Could not validate credentials")
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             email: str = payload.get("email")
             if email is None:
                 raise credentials_exception
         except jwt.ExpiredSignatureError:
-            raise CustomError(status_code=400, message="Token is expired")
+            raise Error401(details="Token is expired")
         user = await crud_user.get_by_email(db, email=email)
         if user is None:
             raise credentials_exception
@@ -140,7 +128,7 @@ class _AuthService:
             async def wrapper(*args, **kwargs):
                 user_role = kwargs.get("current_user")['role']
                 if user_role not in role:
-                    raise CustomError(status_code=403, message="User is not authorized to access")
+                    raise Error403
                 return await func(*args, **kwargs)
             return wrapper
         return decorator

@@ -1,6 +1,16 @@
 from fastapi import HTTPException
 
 
-class CustomError(HTTPException):
-    def __init__(self, status_code: int, message: str, code: str = None):
-        super().__init__(status_code, detail=[{"message": message, "code": code}])
+class Error401(HTTPException):
+    def __init__(self, details: str):
+        super().__init__(401, detail=[{"message": "Received an unauthorized request", "details": details}])
+
+
+class Error400(HTTPException):
+    def __init__(self, details: str):
+        super().__init__(400, detail=[{"message": "Something went wrong", "details": details}])
+
+
+class Error403(HTTPException):
+    def __init__(self, details: str):
+        super().__init__(403, detail=[{"message": "Access denied", "details": details}])

@@ -47,7 +47,7 @@ class User(Base):
         secondary=user_role_table,
         lazy="selectin"
     )
-    bundles: Mapped[List["Bundle"]] = relationship()
+    bundles: Mapped[List["Bundle"]] = relationship(cascade="all, delete-orphan")
 
 
 class Role(Base):
@@ -67,15 +67,14 @@ class Bundle(Base):
     title = Column(String(255), unique=True, nullable=False)
     description = Column(String(1000), unique=False, nullable=True)
     last_revised = Column(DateTime(timezone=True), nullable=False, default=datetime.datetime.utcnow())
-    public_url = Column(Boolean, nullable=False, default=uuid.uuid4(), unique=True)
+    public_url = Column(String(255), nullable=False, default=utils.random_string(), unique=True)
     user_id: Mapped[Uuid] = mapped_column(ForeignKey("users.id"), nullable=False)
-    flashcards: Mapped[List["Flashcard"]] = relationship()
+    flashcards: Mapped[List["Flashcard"]] = relationship(cascade="all, delete-orphan")
 
 
 class Flashcard(Base):
     __tablename__ = 'flashcards'
     id: Mapped[Uuid] = mapped_column(Uuid(as_uuid=True), primary_key=True, nullable=False, default=uuid.uuid4)
+    term = Column(String(255), unique=False, nullable=False)
     description = Column(String(1000), unique=False, nullable=False)
-    completed = Column(String(255), nullable=False, default=False)
-    task_id: Mapped[Uuid] = mapped_column(ForeignKey("tasks.id"))
     bundle_id: Mapped[Uuid] = mapped_column(ForeignKey("bundles.id"))
