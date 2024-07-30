@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.schemas import bundle, common
 from app.crud.bundle import crud_bundle
-from app.core.error_handler import Error400
+from app.core.error_handler import Error400, Error404
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
@@ -53,12 +53,28 @@ class _BundleService:
     ) -> common.GeneralResponse:
         delete_bundle = await crud_bundle.get_by_id(db=db, bundle_id=bundle_id, user_id=user_id)
         if not delete_bundle:
-            Error400(details="Could not find the bundle")
+            Error404(details="Could not find the bundle")
 
         if not await crud_bundle.delete_by_id(db=db, bundle_id=uuid.UUID(bundle_id), user_id=user_id):
             raise Error400(details="Could not delete bundle")
 
         return common.GeneralResponse(message="Bundle was deleted successfully")
+
+    @staticmethod
+    async def update(
+        bundle_id: str,
+        update_data: bundle.AlterRequest,
+        user_id: Uuid,
+        db: AsyncSession
+    ) -> common.GeneralResponse:
+        update_bundle = await crud_bundle.get_by_id(db=db, bundle_id=uuid.UUID(bundle_id), user_id=user_id)
+        if not update_bundle:
+            Error404(details="Could not find the bundle")
+
+        if not await crud_bundle.update(db=db, update_data=update_data, update_bundle=update_bundle):
+            raise Error400(details="Could not alter bundle")
+
+        return common.GeneralResponse(message="Bundle was altered")
 
 
 bundle_service = _BundleService()

@@ -67,3 +67,18 @@ async def delete_by_id(
     current_user: User = Depends(auth_service.get_current_user)
 ) -> common.GeneralResponse:
     return await bundle_service.delete_by_id(bundle_id=bundle_id, db=db, user_id=current_user.id)
+
+
+@bundle_router.put(
+    path="/{bundle_id}",
+    response_model=common.GeneralResponse,
+    status_code=201
+)
+@security.authorize(roles=['ADMIN', 'USER'])
+async def update(
+    bundle_id: str,
+    update_data: bundle.AlterRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(auth_service.get_current_user)
+) -> common.GeneralResponse:
+    return await bundle_service.update(bundle_id=bundle_id, db=db, user_id=current_user.id, update_data=update_data)

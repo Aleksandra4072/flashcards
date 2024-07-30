@@ -3,8 +3,6 @@ from typing import Optional
 from pydantic import (
     BaseModel,
     Field,
-    EmailStr,
-    field_validator
 )
 from datetime import datetime
 
@@ -20,11 +18,24 @@ class AddRequest(BaseModel):
     )
 
 
+class AlterRequest(BaseModel):
+    title: Optional[str] = Field(
+        None,
+        description='Bundle title',
+        examples=['Example title']
+    )
+    description: Optional[str] = Field(
+        None,
+        description='Bundle description',
+        examples=['Example description']
+    )
+
+
 class GetBundleResponseItem(BaseModel):
     id: uuid.UUID
     title: str
     description: str
-    last_revised: datetime
+    last_reviewed: datetime
     public_url: str
 
     class Config:
@@ -42,7 +53,7 @@ class GetAllBundleResponse(BaseModel):
                 'id': "123e4567-e89b-12d3-a456-426614174000",
                 'title': 'Task title',
                 'description': 'Task description',
-                'last_revised': '2024-07-18',
+                'last_reviewed': '2024-07-18',
                 'public_url': "dgfjkh32ihkh4h95hjn",
             }]
         }
@@ -60,7 +71,7 @@ class GetBundleResponse(BaseModel):
                 'id': "123e4567-e89b-12d3-a456-426614174000",
                 'title': 'Task title',
                 'description': 'Task description',
-                'last_revised': '2024-07-18',
+                'last_reviewed': '2024-07-18',
                 'public_url': "dgfjkh32ihkh4h95hjn",
             }]
         }

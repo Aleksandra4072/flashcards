@@ -66,10 +66,10 @@ class Bundle(Base):
     id: Mapped[Uuid] = mapped_column(Uuid(as_uuid=True), primary_key=True, nullable=False, default=uuid.uuid4)
     title = Column(String(255), unique=True, nullable=False)
     description = Column(String(1000), unique=False, nullable=True)
-    last_revised = Column(DateTime(timezone=True), nullable=False, default=datetime.datetime.utcnow())
+    last_reviewed = Column(DateTime(timezone=True), nullable=False, default=datetime.datetime.utcnow())
     public_url = Column(String(255), nullable=False, default=utils.random_string(), unique=True)
     user_id: Mapped[Uuid] = mapped_column(ForeignKey("users.id"), nullable=False)
-    flashcards: Mapped[List["Flashcard"]] = relationship(cascade="all, delete-orphan")
+    flashcards = relationship("Flashcard", cascade="all, delete-orphan")
 
 
 class Flashcard(Base):

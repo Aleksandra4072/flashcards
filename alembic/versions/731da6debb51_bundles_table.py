@@ -26,7 +26,7 @@ def upgrade() -> None:
         Column("id", UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")),
         Column("title", VARCHAR(255), unique=False, nullable=False),
         Column("description", VARCHAR(1000), nullable=True),
-        Column("last_revised", TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow),
+        Column("last_reviewed", TIMESTAMP(timezone=True), nullable=False, default=datetime.utcnow),
         Column("public_url", VARCHAR(255), nullable=False, server_default=text("gen_random_uuid()")),
 
         Column("user_id", UUID(as_uuid=True), sa.ForeignKey('users.id'), nullable=False),

@@ -1,12 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 from sqlalchemy.future import select
 from sqlalchemy import Uuid, delete
 from loguru import logger
 
 from app.models.models import Bundle, Flashcard
 from app.schemas import bundle
-from app.core.error_handler import Error400, Error403
+from app.core.error_handler import Error403, Error404
 
 
 class _CrudBundle:
@@ -45,19 +44,29 @@ class _CrudBundle:
         fetch_bundle = result.scalars().first()
         if fetch_bundle:
             if fetch_bundle.user_id != user_id:
-                raise Error400(details="This bundle does not belong to the current user")
+                raise Error403
             return fetch_bundle
-        raise Error400(details="Such bundle does not exist")
+        raise Error404(details="Bundle does not exist")
 
     @staticmethod
     async def delete_by_id(db: AsyncSession, bundle_id: Uuid, user_id: Uuid) -> bool:
         await db.execute(delete(Flashcard).where(Flashcard.bundle_id == bundle_id))
-
         await db.execute(delete(Bundle).where(Bundle.id == bundle_id, Bundle.user_id == user_id))
-
         await db.commit()
 
-        logger.info('Bundle and all the associated flashcards have been deleted')
+        return True
+
+    @staticmethod
+    async def update(
+        db: AsyncSession,
+        update_data: bundle.AlterRequest,
+        update_bundle: Bundle
+    ):
+        for key, value in update_data.dict(exclude_unset=True).items():
+            setattr(update_bundle, key, value)
+        await db.commit()
+        await db.refresh(update_bundle)
+
         return True
 
 
