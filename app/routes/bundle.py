@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas import common, bundle
 from app.core.db_config import get_db
-from app.sevices.bundle import bundle_service
-from app.sevices.auth import auth_service
+from app.services.bundle import bundle_service
+from app.services.auth import auth_service
 from app.core.security import security
 from app.models.models import User
 
@@ -82,3 +82,15 @@ async def update(
     current_user: User = Depends(auth_service.get_current_user)
 ) -> common.GeneralResponse:
     return await bundle_service.update(bundle_id=bundle_id, db=db, user_id=current_user.id, update_data=update_data)
+
+
+@bundle_router.get(
+    path="/{bundle_url}",
+    response_model=bundle.GetBundleResponse,
+    status_code=200
+)
+async def get_by_url(
+    public_url: str,
+    db: AsyncSession = Depends(get_db),
+) -> bundle.GetBundleResponse:
+    return await bundle_service.get_by_url(db=db, public_url=public_url)

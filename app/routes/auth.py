@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.sevices.auth import auth_service
+from app.services.auth import auth_service
 from app.schemas import auth
 from app.schemas import common
 from app.core.db_config import get_db

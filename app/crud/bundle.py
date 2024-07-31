@@ -69,5 +69,18 @@ class _CrudBundle:
 
         return True
 
+    @staticmethod
+    async def get_by_url(
+        db: AsyncSession,
+        public_url: str
+    ):
+        logger.info("Fetching bundle by public url")
+        stmt = select(Bundle).where(Bundle.public_url == public_url)
+        result = await db.execute(stmt)
+        fetch_bundle = result.scalars().first()
+        if fetch_bundle:
+            return fetch_bundle
+        raise Error404(details="Bundle does not exist")
+
 
 crud_bundle = _CrudBundle()

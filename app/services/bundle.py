@@ -76,5 +76,28 @@ class _BundleService:
 
         return common.GeneralResponse(message="Bundle was altered")
 
+    @staticmethod
+    async def is_bundle_owner(
+        bundle_id: str,
+        user_id: Uuid,
+        db: AsyncSession
+    ) -> bool:
+        update_bundle = await crud_bundle.get_by_id(db=db, bundle_id=uuid.UUID(bundle_id), user_id=user_id)
+        if not update_bundle:
+            Error404(details="Could not find the bundle")
+
+        return True
+
+    @staticmethod
+    async def get_by_url(
+        public_ulr: str,
+        db: AsyncSession
+    ) -> bundle.GetBundleResponse:
+        result = await crud_bundle.get_by_url(db=db, public_url=public_ulr)
+        if not result:
+            raise Error400(details="Could not get the bundle")
+
+        return bundle.GetBundleResponse(bundle=result)
+
 
 bundle_service = _BundleService()
