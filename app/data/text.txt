@@ -1,0 +1,14 @@
+[
+  {
+    type: "kind_1",
+    description: "description_1"
+  },
+  {
+    type: "kind_2",
+    description: "description_2"
+  },
+  {
+    type: "kind_3",
+    description: "description_3"
+  }
+]

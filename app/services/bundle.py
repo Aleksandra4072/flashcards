@@ -1,13 +1,10 @@
 import uuid
 from sqlalchemy import Uuid
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.security import OAuth2PasswordBearer
 
 from app.schemas import bundle, common
 from app.crud.bundle import crud_bundle
 from app.core.error_handler import Error400, Error404
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 class _BundleService:
@@ -18,7 +15,7 @@ class _BundleService:
         db: AsyncSession
     ) -> common.GeneralResponse:
         if not await crud_bundle.add(db=db, bundle_data=bundle_data, user_id=user_id):
-            raise Error400(details="Could not add a bundle")
+            raise Error400(detail="Could not add a bundle")
 
         return common.GeneralResponse(
             message="Bundle was added successfully"
@@ -41,7 +38,7 @@ class _BundleService:
     ) -> bundle.GetBundleResponse:
         result = await crud_bundle.get_by_id(db=db, bundle_id=uuid.UUID(bundle_id), user_id=user_id)
         if not result:
-            raise Error400(details="Could not get the bundle")
+            raise Error400(detail="Could not get the bundle")
 
         return bundle.GetBundleResponse(bundle=result)
 
@@ -53,10 +50,10 @@ class _BundleService:
     ) -> common.GeneralResponse:
         delete_bundle = await crud_bundle.get_by_id(db=db, bundle_id=bundle_id, user_id=user_id)
         if not delete_bundle:
-            Error404(details="Could not find the bundle")
+            Error404(detail="Could not find the bundle")
 
         if not await crud_bundle.delete_by_id(db=db, bundle_id=uuid.UUID(bundle_id), user_id=user_id):
-            raise Error400(details="Could not delete bundle")
+            raise Error400(detail="Could not delete bundle")
 
         return common.GeneralResponse(message="Bundle was deleted successfully")
 
@@ -69,10 +66,10 @@ class _BundleService:
     ) -> common.GeneralResponse:
         update_bundle = await crud_bundle.get_by_id(db=db, bundle_id=uuid.UUID(bundle_id), user_id=user_id)
         if not update_bundle:
-            Error404(details="Could not find the bundle")
+            Error404(detail="Could not find the bundle")
 
         if not await crud_bundle.update(db=db, update_data=update_data, update_bundle=update_bundle):
-            raise Error400(details="Could not alter bundle")
+            raise Error400(detail="Could not alter bundle")
 
         return common.GeneralResponse(message="Bundle was altered")
 
@@ -84,7 +81,7 @@ class _BundleService:
     ) -> bool:
         update_bundle = await crud_bundle.get_by_id(db=db, bundle_id=uuid.UUID(bundle_id), user_id=user_id)
         if not update_bundle:
-            Error404(details="Could not find the bundle")
+            Error404(detail="Could not find the bundle")
 
         return True
 
@@ -95,7 +92,7 @@ class _BundleService:
     ) -> bundle.GetBundleResponse:
         result = await crud_bundle.get_by_url(db=db, public_url=public_ulr)
         if not result:
-            raise Error400(details="Could not get the bundle")
+            raise Error400(detail="Could not get the bundle")
 
         return bundle.GetBundleResponse(bundle=result)
 

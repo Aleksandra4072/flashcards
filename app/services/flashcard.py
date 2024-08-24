@@ -28,7 +28,7 @@ class _FlashcardService:
     ) -> Flashcard:
         result = await crud_flashcard.get_by_id(db=db, flashcard_id=uuid.UUID(flashcard_id))
         if not result:
-            raise Error400(details="Could not get the flashcard")
+            raise Error400(detail="Could not get the flashcard")
 
         return result
 
@@ -42,7 +42,7 @@ class _FlashcardService:
                 flashcard_data=flashcard_data,
                 bundle_id=uuid.UUID(flashcard_data.bundle_id)
         ):
-            raise Error400(details="Could not add a flashcard")
+            raise Error400(detail="Could not add a flashcard")
 
         return common.GeneralResponse(
             message="Flashcard was added successfully"
@@ -62,7 +62,7 @@ class _FlashcardService:
         )
         is_deleted = await crud_flashcard.delete_by_id(db=db, flashcard_id=uuid.UUID(flashcard_id))
         if not is_deleted:
-            Error404(details="Could not find the flashcard")
+            Error404(detail="Could not find the flashcard")
 
         return common.GeneralResponse(message="Flashcard was deleted successfully")
 
@@ -81,7 +81,7 @@ class _FlashcardService:
         )
 
         if not await crud_flashcard.update(db=db, update_data=update_data, update_flashcard=update_flashcard):
-            raise Error400(details="Could not alter bundle")
+            raise Error400(detail="Could not alter bundle")
 
         return common.GeneralResponse(message="Bundle was altered")
 

@@ -1,4 +1,6 @@
+import os
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from starlette.middleware.cors import CORSMiddleware
 
 from app.routes.auth import auth_router
@@ -21,6 +23,16 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(bundle_router)
 app.include_router(flashcard_router)
+
+
+@app.get("/download_file/{filename}")
+async def download_file(filename: str):
+    file_path = f"app/data/{filename}"
+    if os.path.exists(file_path):
+        return FileResponse(path=file_path, filename=filename)
+    else:
+        return {"error": "File not found"}
+
 
 if __name__ == '__main__':
     import uvicorn

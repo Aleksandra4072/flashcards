@@ -23,10 +23,10 @@ class _AuthService:
         db: AsyncSession
     ) -> common.GeneralResponse:
         if await crud_user.get_by_email(db=db, email=user_details.email):
-            raise Error400(details="Email already registered")
+            raise Error400(detail="Email already registered")
 
         if not await crud_user.sign_up(db=db, user=user_details):
-            raise Error400(details="Something went wrong")
+            raise Error400(detail="Something went wrong")
 
         return common.GeneralResponse(
             message="Signup successful"
@@ -44,7 +44,7 @@ class _AuthService:
                 plain_password=credentials.password,
                 hashed_password=user.password
         ):
-            raise Error401(details="Wrong credentials")
+            raise Error401(detail="Wrong credentials")
 
         roles = [role.name for role in user.roles]
         access_token = security.create_access_token(
@@ -69,17 +69,17 @@ class _AuthService:
     ) -> auth.LoginResponse:
         refresh_token = request.cookies.get('refresh_token')
         if not refresh_token:
-            raise Error401(details="Refresh token not found")
+            raise Error401(detail="Refresh token not found")
 
         try:
             payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             email: str = payload.get("email")
             if email is None:
-                raise Error401(details="Payload is empty")
+                raise Error401(detail="Payload is empty")
         except jwt.ExpiredSignatureError:
-            raise Error401(details="Expired token")
+            raise Error401(detail="Expired token")
         except jwt.InvalidTokenError:
-            raise Error401(details="Invalid token")
+            raise Error401(detail="Invalid token")
 
         user = await crud_user.get_by_email(db=db, email=email)
         roles = [role.name for role in user.roles]
@@ -102,20 +102,20 @@ class _AuthService:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             return {"token_payload": payload}
         except jwt.ExpiredSignatureError:
-            raise Error401(details="Token is expired")
+            raise Error401(detail="Token is expired")
         except jwt.PyJWTError:
-            raise Error401(details="Token is invalid")
+            raise Error401(detail="Token is invalid")
 
     @staticmethod
     async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
-        credentials_exception = Error401(details="Could not validate credentials")
+        credentials_exception = Error401(detail="Could not validate credentials")
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             email: str = payload.get("email")
             if email is None:
                 raise credentials_exception
         except jwt.ExpiredSignatureError:
-            raise Error401(details="Token is expired")
+            raise Error401(detail="Token is expired")
         user = await crud_user.get_by_email(db, email=email)
         if user is None:
             raise credentials_exception
