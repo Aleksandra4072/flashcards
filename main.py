@@ -1,11 +1,12 @@
 import os
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from starlette.middleware.cors import CORSMiddleware
 
 from app.routes.auth import auth_router
 from app.routes.bundle import bundle_router
 from app.routes.flashcard import flashcard_router
+from app.core.error_handler import Error404
 app = FastAPI()
 
 origins: list[str] = [
@@ -33,6 +34,29 @@ async def download_file(filename: str):
     else:
         return {"error": "File not found"}
 
+
+@app.get("/excel")
+async def download_file():
+    file_path = f"app/data/excel.xlsx"
+    if not os.path.exists(file_path):
+        raise Error404("File not found")
+
+    file_size = os.path.getsize(file_path)
+
+    def iterfile():
+        with open(file_path, mode="rb") as file_like:
+            yield from file_like
+
+    headers = {
+        "Content-Length": str(file_size),
+        "Content-Disposition": f"attachment; filename=excel.xlsx"
+    }
+
+    return StreamingResponse(
+        iterfile(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers=headers
+    )
 
 if __name__ == '__main__':
     import uvicorn
