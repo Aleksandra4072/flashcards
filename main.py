@@ -86,16 +86,6 @@ HLSMAX = 240
 RGBMAX = 255
 
 
-def get_rgb_color(color_node):
-    xlmns = 'http://schemas.openxmlformats.org/drawingml/2006/main'
-    """ Extract RGB color from color node """
-    if color_node.find(str(QName(xlmns, 'srgbClr'))) is not None:
-        return color_node.find(str(QName(xlmns, 'srgbClr'))).get('val')
-    elif color_node.find(str(QName(xlmns, 'sysClr'))) is not None:
-        return color_node.find(str(QName(xlmns, 'sysClr'))).get('lastClr')
-    return '000000'
-
-
 def get_theme_colors(wb):
     xlmns = 'http://schemas.openxmlformats.org/drawingml/2006/main'
     root = fromstring(wb.loaded_theme)
@@ -106,9 +96,11 @@ def get_theme_colors(wb):
     colors = []
     for c in ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6']:
         accent = first_color_scheme.find(str(QName(xlmns, c)))
-        if accent is not None:
-            rgb_color = get_rgb_color(accent)
-            colors.append(rgb_color)
+
+        if accent.find(str(QName(xlmns, 'srgbClr'))) is not None:
+            colors.append(accent.find(str(QName(xlmns, 'srgbClr'))).get('val'))
+        elif accent.find(str(QName(xlmns, 'sysClr'))) is not None:
+            colors.append(accent.find(str(QName(xlmns, 'sysClr'))).get('lastClr'))
         else:
             colors.append('000000')  # Default to black if color not found
     return colors
