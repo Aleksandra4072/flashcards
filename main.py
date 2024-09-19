@@ -1,6 +1,6 @@
 import os
 import openpyxl
-from openpyxl.styles.colors import COLOR_INDEX
+from openpyxl.xml.functions import QName, fromstring
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -82,18 +82,81 @@ def convert_to_hex_color(color_code):
         return "#000000"
 
 
-def get_hex_color(color):
-    if color is None:
-        return '#FFFFFF'
+HLSMAX = 240
+RGBMAX = 255
 
-    if color.type == 'rgb':
-        return f"#{color.rgb[2:]}"
-    elif color.type == "indexed":
-        return f"#{color.rgb[2:]}"
-    elif color.type == 'theme':
-        return f"##{color.theme:06X}"
 
-    return '#FFFFFF'
+def get_rgb_color(color_node):
+    xlmns = 'http://schemas.openxmlformats.org/drawingml/2006/main'
+    """ Extract RGB color from color node """
+    if color_node.find(str(QName(xlmns, 'srgbClr'))) is not None:
+        return color_node.find(str(QName(xlmns, 'srgbClr'))).get('val')
+    elif color_node.find(str(QName(xlmns, 'sysClr'))) is not None:
+        return color_node.find(str(QName(xlmns, 'sysClr'))).get('lastClr')
+    return '000000'
+
+
+def get_theme_colors(wb):
+    xlmns = 'http://schemas.openxmlformats.org/drawingml/2006/main'
+    root = fromstring(wb.loaded_theme)
+    theme_el = root.find(str(QName(xlmns, 'themeElements')))
+    color_schemes = theme_el.findall(str(QName(xlmns, 'clrScheme')))
+    first_color_scheme = color_schemes[0]
+
+    colors = []
+    for c in ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6']:
+        accent = first_color_scheme.find(str(QName(xlmns, c)))
+        if accent is not None:
+            rgb_color = get_rgb_color(accent)
+            colors.append(rgb_color)
+        else:
+            colors.append('000000')  # Default to black if color not found
+    return colors
+
+
+def tint_color(rgb, tint):
+    # Convert hex to RGB
+    r = int(rgb[0:2], 16)
+    g = int(rgb[2:4], 16)
+    b = int(rgb[4:6], 16)
+
+    if tint < 0:
+        r = int(r * (1.0 + tint))
+        g = int(g * (1.0 + tint))
+        b = int(b * (1.0 + tint))
+    else:
+        r = int(r * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint)))
+        g = int(g * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint)))
+        b = int(b * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint)))
+
+    # Ensure values are in valid range
+    r = max(0, min(255, r))
+    g = max(0, min(255, g))
+    b = max(0, min(255, b))
+
+    return f"{r:02X}{g:02X}{b:02X}"
+
+
+def theme_and_tint_to_hex(theme_index, tint, wb):
+    theme_colors = get_theme_colors(wb)
+    rgb = theme_colors[theme_index]
+
+    # Remove the alpha channel if present
+    if len(rgb) == 8:  # e.g., 'FF0000FF'
+        rgb = rgb[2:]  # 'FF0000'
+
+    # Tint the RGB color
+    hex_color = tint_color(rgb, tint)
+    return f"#{hex_color}"
+
+
+def get_fill_color(fill_color, wb):
+    if fill_color.type == "rgb":
+        return None if fill_color.rgb is None or fill_color.rgb == "00000000" else f"#{str(fill_color.rgb)[2:]}"
+    elif fill_color.type == "theme":
+        return theme_and_tint_to_hex(fill_color.theme, fill_color.tint, wb)
+    else:
+        return None
 
 
 @app.get("/sheet_data/{sheet_name}")
@@ -110,6 +173,8 @@ async def get_sheet_data(sheet_name: str):
         # Prepare data
         cell_data = []
         border_info = []
+
+        print(wb.loaded_theme)
 
         for row_index, row in enumerate(sheet.iter_rows()):
             for col_index, cell in enumerate(row):
@@ -128,6 +193,7 @@ async def get_sheet_data(sheet_name: str):
                         "fs": cell.font.size,
                         "ht": 0 if cell.alignment.horizontal == 'center' else 1 if cell.alignment.horizontal == 'left' else 2,
                         "fc": convert_to_hex_color(str(cell.font.color.rgb)),
+                        "bg": get_fill_color(cell.fill.start_color, wb),
                     }
                 })
 
