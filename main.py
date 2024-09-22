@@ -1,6 +1,7 @@
 import os
 import openpyxl
 from openpyxl.xml.functions import QName, fromstring
+from openpyxl.utils import coordinate_to_tuple
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -151,6 +152,30 @@ def get_fill_color(fill_color, wb):
         return None
 
 
+def merged(merged_cells, coord1):
+    for cell in merged_cells:
+        if coord1 in cell and str(cell).startswith(coord1):
+            coord2 = str(cell).split(":")[1]
+            tuple1 = coordinate_to_tuple(coord1)
+            tuple2 = coordinate_to_tuple(coord2)
+            return {
+                "r": tuple1[0] - 1,
+                "c": tuple1[1] - 1,
+                "rs": tuple2[0] - tuple1[0] + 1,
+                "cs": tuple2[1] - tuple1[1] + 1,
+            }
+    return None
+
+
+def get_border_style(border):
+    if border.style is None:
+        return None
+    return {
+        "style": 7 if border.style == "thin" else 8,
+        "color": "rgb(0, 0, 0)"
+    }
+
+
 @app.get("/sheet_data/{sheet_name}")
 async def get_sheet_data(sheet_name: str):
     file_path = "app/data/excel.xlsx"
@@ -165,13 +190,13 @@ async def get_sheet_data(sheet_name: str):
         # Prepare data
         cell_data = []
         border_info = []
-
-        print(wb.loaded_theme)
+        merged_cells = []
 
         for row_index, row in enumerate(sheet.iter_rows()):
             for col_index, cell in enumerate(row):
                 # Extract cell value
                 value = "<Image>" if cell.data_type == "e" else str(cell.value) if cell.value is not None else ""
+                merge = merged(sheet.merged_cells.ranges, cell.coordinate)
 
                 # Add cell data
                 cell_data.append({
@@ -186,6 +211,7 @@ async def get_sheet_data(sheet_name: str):
                         "ht": 0 if cell.alignment.horizontal == 'center' else 1 if cell.alignment.horizontal == 'left' else 2,
                         "fc": convert_to_hex_color(str(cell.font.color.rgb)),
                         "bg": get_fill_color(cell.fill.start_color, wb),
+                        "mc": merge
                     }
                 })
 
@@ -194,34 +220,22 @@ async def get_sheet_data(sheet_name: str):
                     "value": {
                         "row_index": row_index,
                         "col_index": col_index,
-                        "l":  None if cell.border.left.style is None else
-                            {
-                                "style": 7 if cell.border.left.style == "thin" else 8,
-                                "color": "rgb(0, 0, 0)"
-                            },
-                        "r":  None if cell.border.left.style is None else
-                            {
-                                "style": 7 if cell.border.right.style == "thin" else 8,
-                                "color": "rgb(0, 0, 0)"
-                            },
-                        "t":  None if cell.border.left.style is None else
-                            {
-                                "style": 7 if cell.border.top.style == "thin" else 8,
-                                "color": "rgb(0, 0, 0)"
-                            },
-                        "b":  None if cell.border.left.style is None else
-                            {
-                                "style": 7 if cell.border.bottom.style == "thin" else 8,
-                                "color": "rgb(0, 0, 0)"
-                            },
+                        "l": get_border_style(cell.border.left),
+                        "r": get_border_style(cell.border.right),
+                        "t": get_border_style(cell.border.top),
+                        "b": get_border_style(cell.border.bottom),
                     }
                 })
+
+                if merge:
+                    merged_cells.append(merge)
 
         sheet_data = {
             "name": sheet_name,
             "celldata": cell_data,
             "config": {
-                "borderInfo": border_info
+                "borderInfo": border_info,
+                "merge": merged_cells if None else None
             },
         }
 
