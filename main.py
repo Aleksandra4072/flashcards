@@ -1,16 +1,20 @@
 import os
 import openpyxl
+
+from PIL import Image
 from openpyxl.xml.functions import QName, fromstring
 from openpyxl.utils import coordinate_to_tuple
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from starlette.middleware.cors import CORSMiddleware
-from typing import List
+from typing import List, io
 
 from app.routes.auth import auth_router
 from app.routes.bundle import bundle_router
 from app.routes.flashcard import flashcard_router
 from app.core.error_handler import Error404
+from app.schemas import common
+
 app = FastAPI()
 
 origins: list[str] = [
@@ -37,6 +41,24 @@ async def download_file(filename: str):
         return FileResponse(path=file_path, filename=filename)
     else:
         return {"error": "File not found"}
+
+
+@app.post("/crop_image")
+async def crop_image(req: common.CropImgRequest):
+    file_path = f"app/data/{req.filename}"
+    image = Image.open(file_path)
+
+    crop_img = image.crop((req.left, req.top, req.right, req.bottom))
+
+    # Generate new filename
+    file_name, file_extension = os.path.splitext(req.filename)
+    new_filename = f"{file_name}_{req.left}_{req.top}_patch{file_extension}"
+    new_file_path = f"app/data/{new_filename}"
+
+    # Save the cropped image with the new filename
+    crop_img.save(new_file_path)
+
+    return {"new_filename": new_filename}
 
 
 @app.get("/excel")
