@@ -2,6 +2,7 @@ import os
 import openpyxl
 
 from PIL import Image
+from openpyxl.drawing.image import Image
 from openpyxl.xml.functions import QName, fromstring
 from openpyxl.utils import coordinate_to_tuple
 from fastapi import FastAPI, HTTPException
@@ -214,11 +215,24 @@ async def get_sheet_data(sheet_name: str):
         border_info = []
         merged_cells = []
 
+        # Create a set of image locations
+        image_locations = set()
+        for image in sheet._images:
+            if isinstance(image, Image):
+                row = image.anchor._from.row
+                col = image.anchor._from.col
+                image_locations.add((row, col))
+
         for row_index, row in enumerate(sheet.iter_rows()):
             for col_index, cell in enumerate(row):
-                # Extract cell value
-                value = "<Image>" if cell.data_type == "e" else str(cell.value) if cell.value is not None else ""
                 merge = merged(sheet.merged_cells.ranges, cell.coordinate)
+
+                # Extract cell value
+                if (row_index, col_index) in image_locations:
+                    print("Image found")
+                    value = "<IMAGE>"
+                else:
+                    value = "<IMAGE>" if cell.data_type == "e" or cell.data_type == 'p' else str(cell.value) if cell.value is not None else ""
 
                 # Add cell data
                 cell_data.append({
